@@ -1,26 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ckx.gateway.mapper.GatewayDynamicRouteMapper">
+<mapper namespace="com.ckx.gateway.mapper.RouteMapper">
     <!--获取路由列表-->
-    <select id="getListByEnable" resultType="com.ckx.gateway.entity.GatewayDynamicRoute">
-        SELECT route_id AS routeID,uri,sort_index AS sortIndex,predicate_json AS predicates,filter_json AS filters,`enable` FROM gateway_dynamic_route
+    <select id="getRouteList" resultType="com.ckx.gateway.entity.Route">
+        SELECT route_id AS routeId,uri,sort_index AS sortIndex,predicate_json AS predicates,filter_json AS filters,flag FROM test.gateway_dynamic_route
     </select>
 
     <!--新增路由-->
-    <insert id="insertGatewayDynamicRoute">
-        insert into gateway_dynamic_route(route_id,uri,sort_index,predicate_json,filter_json,enable)
-        values(#{routeId},#{uri},#{sortIndex},#{predicates},#{filters},#{enable})
+    <insert id="insertRoute">
+        insert into gateway_dynamic_route(route_id,uri,sort_index,predicate_json,filter_json,flag)
+        values(#{routeId},#{uri},#{sortIndex},#{predicates},#{filters},#{flag})
     </insert>
 
     <!--更新路由-->
-    <update id="updateGatewayDynamicRoute">
-        update gateway_dynamic_route set uri=#{entity.uri},sort_index=#{entity.sortIndex},predicate_json=#{entity.predicates},filter_json=#{entity.filters},enable=#{entity.enable}
+    <update id="updateRoute">
+        update gateway_dynamic_route set uri=#{entity.uri},sort_index=#{entity.sortIndex},predicate_json=#{entity.predicates},filter_json=#{entity.filters},enable=#{entity.flag}
         where route_id = #{routeId}
     </update>
 
-    <!--更新路由禁用状态-->
-    <update id="updateEnable">
-        update gateway_dynamic_route set enable=#{enable}
-        where route_id = #{routeId}
-    </update>
 </mapper>

@@ -1,6 +1,11 @@
 server:
   port: 8700
 
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
 spring:
   application:
     name: gateway
@@ -11,7 +16,6 @@ spring:
       uri: http://localhost:8888/
     gateway:
       routes:
-        #用户模块
         - id: user
           uri: lb://user
           predicates:
@@ -25,18 +29,11 @@ spring:
     lettuce:
       pool:
         max-active: 300
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
+  datasource:
+    url: jdbc:mysql://localhost:3306/test?useSSL=false&allowMultiQueries=true&tinyInt1isBit=false
+    username: root
+    password: root
+    driver-class-name: com.mysql.jdbc.Driver
 
-hystrix:
-  command:
-    default:  #default全局有效，service id指定应用有效
-      execution:
-        timeout:
-          enabled: true
-        isolation:
-          thread:
-            timeoutInMilliseconds: 5000 #断路器超时时间，默认1000ms
-
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
