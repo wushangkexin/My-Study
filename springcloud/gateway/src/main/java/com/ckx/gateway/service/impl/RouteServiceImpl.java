@@ -14,11 +14,11 @@ public class RouteServiceImpl implements RouteService {
     @Autowired
     private RouteMapper routeMapper;
 
-    public List<Route> getRouteList() throws Exception{
+    public List<Route> getRouteList(){
         return routeMapper.getRouteList();
     }
 
-    public String insertRoute(Route route) throws Exception{
+    public String insertRoute(Route route){
         JSONObject obj = new JSONObject();
         int i = routeMapper.insertRoute(route);
         if(i>0){
@@ -29,7 +29,7 @@ public class RouteServiceImpl implements RouteService {
         return obj.toString();
     }
 
-    public String updateRoute(Route route) throws Exception{
+    public String updateRoute(Route route){
         JSONObject obj = new JSONObject();
         int i = routeMapper.updateRoute(route.getRouteId(),route);
         if(i>0){

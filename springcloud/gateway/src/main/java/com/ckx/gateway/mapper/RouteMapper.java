@@ -7,9 +7,9 @@ import java.util.List;
 
 @Mapper
 public interface RouteMapper {
-    List<Route> getRouteList() throws Exception;
+    List<Route> getRouteList();
 
-    int insertRoute(Route route) throws Exception;
+    int insertRoute(Route route);
 
-    int updateRoute(String routeId ,Route route) throws Exception;
+    int updateRoute(String routeId ,Route route);
 }

@@ -5,9 +5,9 @@ import com.ckx.gateway.entity.Route;
 import java.util.List;
 
 public interface RouteService {
-    List<Route> getRouteList() throws Exception;
+    List<Route> getRouteList();
 
-    String insertRoute(Route route) throws Exception;
+    String insertRoute(Route route);
 
-    String updateRoute(Route route) throws Exception;
+    String updateRoute(Route route);
 }

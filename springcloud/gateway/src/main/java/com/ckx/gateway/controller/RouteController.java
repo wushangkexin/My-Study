@@ -1,5 +1,7 @@
 package com.ckx.gateway.controller;
 
+import com.alibaba.fastjson.JSONArray;
+import com.ckx.gateway.dynamic.DynamicRouteServiceImpl;
 import com.ckx.gateway.entity.Route;
 import com.ckx.gateway.entity.RouteVo;
 import com.ckx.gateway.service.RouteService;
@@ -13,6 +15,8 @@ import java.util.List;
 public class RouteController {
     @Autowired
     private RouteService routeService;
+    @Autowired
+    private DynamicRouteServiceImpl dynamicRouteService;
 
     @GetMapping("/getRouteList")
     public List<Route> getRouteList() throws Exception{
@@ -25,8 +29,8 @@ public class RouteController {
         r.setRouteId(route.getRouteId());
         r.setUri(route.getUri());
         r.setSortIndex(route.getSortIndex());
-        r.setPredicates(route.getPredicates().toString());
-        r.setFilters(route.getFilters().toString());
+        r.setPredicates(JSONArray.toJSON(route.getPredicates()).toString());
+        r.setFilters(JSONArray.toJSON(route.getFilters()).toString());
         r.setFlag(route.getFlag());
         return routeService.insertRoute(r);
     }
@@ -37,8 +41,8 @@ public class RouteController {
         r.setRouteId(route.getRouteId());
         r.setUri(route.getUri());
         r.setSortIndex(route.getSortIndex());
-        r.setPredicates(route.getPredicates().toString());
-        r.setFilters(route.getFilters().toString());
+        r.setPredicates(JSONArray.toJSON(route.getPredicates()).toString());
+        r.setFilters(JSONArray.toJSON(route.getFilters()).toString());
         r.setFlag(route.getFlag());
         return routeService.updateRoute(r);
     }
