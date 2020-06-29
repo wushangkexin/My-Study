@@ -7,6 +7,8 @@ import com.ckx.gateway.entity.Route;
 import com.ckx.gateway.service.RouteService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.FilterDefinition;
 import org.springframework.cloud.gateway.handler.predicate.PredicateDefinition;
@@ -36,11 +38,13 @@ public class MysqlRouteDefinitionRepository implements RouteDefinitionRepository
      */
     @Override
     public Flux<RouteDefinition> getRouteDefinitions() {
-        Object obj = redisUtils.hmget(GATEWAY_ROUTES);
+        System.out.println("自动加载路由信息");
+        Object obj = redisUtils.get(GATEWAY_ROUTES);
         List<RouteDefinition> routeList = null;
         if (Objects.isNull(obj) || MapUtils.isEmpty((Map<?, ?>) obj)) {
             System.out.println("从数据库获取路由信息");
             List<Route> list = routeService.getRouteList();
+            redisUtils.set(GATEWAY_ROUTES,list);
             if (CollectionUtils.isNotEmpty(list)){
                 //转换成 RouteDefinition 集合后，返回
                 routeList = this.toRouteList(redisUtils,list);
@@ -80,7 +84,7 @@ public class MysqlRouteDefinitionRepository implements RouteDefinitionRepository
         list.stream().forEach(route->{
             RouteDefinition r = this.setRouteDefinition(route);
             routeList.add(r);
-            redisUtils.hset(GATEWAY_ROUTES,r.getId(),r);
+            redisUtils.set(r.getId(),r);
         });
         return routeList;
     }
