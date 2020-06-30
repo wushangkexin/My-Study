@@ -58,12 +58,14 @@ public class MysqlRouteDefinitionRepository implements RouteDefinitionRepository
 
     @Override
     public Mono<Void> save(Mono<RouteDefinition> route) {
-        return null;
+        System.out.println("调用save方法");
+        return Mono.empty();
     }
 
     @Override
     public Mono<Void> delete(Mono<String> routeId) {
-        return null;
+        System.out.println("调用delete方法");
+        return Mono.empty();
     }
 
     /**
