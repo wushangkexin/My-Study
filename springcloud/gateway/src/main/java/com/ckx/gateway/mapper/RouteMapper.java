@@ -12,4 +12,6 @@ public interface RouteMapper {
     int insertRoute(Route route);
 
     int updateRoute(String routeId ,Route route);
+
+    int deleteRoute(String id);
 }

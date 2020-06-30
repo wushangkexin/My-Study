@@ -4,17 +4,24 @@
     <!--获取路由列表-->
     <select id="getRouteList" resultType="com.ckx.gateway.entity.Route">
         SELECT route_id AS routeId,uri,sort_index AS sortIndex,predicate_json AS predicates,filter_json AS filters,flag FROM test.gateway_dynamic_route
-    </select>
+        where flag = 1
+</select>
 
     <!--新增路由-->
     <insert id="insertRoute">
-        insert into gateway_dynamic_route(route_id,uri,sort_index,predicate_json,filter_json,flag)
-        values(#{routeId},#{uri},#{sortIndex},#{predicates},#{filters},#{flag})
+        insert into gateway_dynamic_route(route_id,uri,sort_index,predicate_json,filter_json)
+        values(#{routeId},#{uri},#{sortIndex},#{predicates},#{filters})
     </insert>
 
     <!--更新路由-->
     <update id="updateRoute">
-        update gateway_dynamic_route set uri=#{entity.uri},sort_index=#{entity.sortIndex},predicate_json=#{entity.predicates},filter_json=#{entity.filters},enable=#{entity.flag}
+        update gateway_dynamic_route set uri=#{entity.uri},sort_index=#{entity.sortIndex},predicate_json=#{entity.predicates},filter_json=#{entity.filters}
+        where route_id = #{routeId}
+    </update>
+
+    <!--删除路由-->
+    <update id="deleteRoute">
+        update gateway_dynamic_route set flag = 2
         where route_id = #{routeId}
     </update>
 

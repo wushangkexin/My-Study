@@ -1,5 +1,7 @@
 package com.ckx.gateway.dynamic;
 
+import com.ckx.gateway.entity.Route;
+import com.ckx.gateway.mapper.RouteMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
 import org.springframework.cloud.gateway.route.RouteDefinition;
@@ -9,10 +11,14 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Service
 public class DynamicRouteServiceImpl implements ApplicationEventPublisherAware {
     @Autowired
     private RouteDefinitionWriter routeDefinitionWriter;
+    @Autowired
+    private RouteMapper routeMapper;
 
     private ApplicationEventPublisher publisher;
 
@@ -64,6 +70,19 @@ public class DynamicRouteServiceImpl implements ApplicationEventPublisherAware {
             return "delete fail,not find route  routeId: " + id;
         }
         return "delete success";
+    }
+
+    /**
+     * 从数据库中读取路由信息
+     * @return
+     */
+    public String loadMysql(){
+        List<Route> list = routeMapper.getRouteList();
+        for (int i = 0;i<list.size();i++){
+            routeDefinitionWriter.save(Mono.just(DynamicUtil.getRouteDefinition(list.get(i)))).subscribe();
+        }
+        this.doLoad();
+        return "load success";
     }
 
     /**

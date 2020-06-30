@@ -10,4 +10,6 @@ public interface RouteService {
     String insertRoute(Route route);
 
     String updateRoute(Route route);
+
+    String deleteRoute(String routeId);
 }

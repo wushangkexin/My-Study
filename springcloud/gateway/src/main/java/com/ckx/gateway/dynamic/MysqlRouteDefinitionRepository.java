@@ -1,17 +1,14 @@
 package com.ckx.gateway.dynamic;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.ckx.common.redis.util.RedisUtils;
 import com.ckx.gateway.entity.Route;
 import com.ckx.gateway.service.RouteService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.gateway.filter.FilterDefinition;
-import org.springframework.cloud.gateway.handler.predicate.PredicateDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionRepository;
+import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -50,7 +47,7 @@ public class MysqlRouteDefinitionRepository implements RouteDefinitionRepository
             // map转list
             List<Route> list = ((Map<String, Route>)obj).entrySet().parallelStream().map(map->map.getValue()).collect(Collectors.toList());
             for (int i = 0;i<list.size();i++){
-                routeList.add(this.setRouteDefinition(list.get(i)));
+                routeList.add(DynamicUtil.getRouteDefinition(list.get(i)));
             }
         }
         return Flux.fromIterable(routeList);
@@ -59,13 +56,24 @@ public class MysqlRouteDefinitionRepository implements RouteDefinitionRepository
     @Override
     public Mono<Void> save(Mono<RouteDefinition> route) {
         System.out.println("调用save方法");
-        return Mono.empty();
+        return route.flatMap(routeDefinition -> {
+            Route r = DynamicUtil.getRouteByDefinition(routeDefinition);
+            redisUtils.hset(GATEWAY_ROUTES,routeDefinition.getId(),r);
+            return Mono.empty();
+        });
     }
 
     @Override
     public Mono<Void> delete(Mono<String> routeId) {
         System.out.println("调用delete方法");
-        return Mono.empty();
+        return routeId.flatMap(id -> {
+            Route route = (Route)redisUtils.hget(GATEWAY_ROUTES, id);
+            if (route != null) {
+                redisUtils.hdel(GATEWAY_ROUTES, id);
+                return Mono.empty();
+            }
+            return Mono.defer(() -> Mono.error(new NotFoundException("路由文件没有找到: " + routeId)));
+        });
     }
 
     /**
@@ -82,38 +90,11 @@ public class MysqlRouteDefinitionRepository implements RouteDefinitionRepository
          * 然后在转换成 List<PredicateDefinition>和 List<FilterDefinition>
          */
         list.stream().forEach(route->{
-            RouteDefinition r = this.setRouteDefinition(route);
+            RouteDefinition r = DynamicUtil.getRouteDefinition(route);
             routeList.add(r);
             redisUtils.hset(GATEWAY_ROUTES,r.getId(),route);
         });
         return routeList;
     }
 
-    public RouteDefinition setRouteDefinition(Route route){
-        RouteDefinition r = new RouteDefinition();
-        r.setId(route.getRouteId());
-        r.setUri(DynamicUtil.getUri(route.getUri()));
-        r.setOrder(route.getSortIndex());
-        JSONArray predicate_ja = JSONArray.parseArray(route.getPredicates());
-        List<PredicateDefinition> predicateDefinitionList = new ArrayList<>();
-        for (int i = 0;i<predicate_ja.size();i++){
-            JSONObject predicate_jo = (JSONObject)predicate_ja.get(i);
-            PredicateDefinition predicateDefinition = new PredicateDefinition();
-            predicateDefinition.setName((String) predicate_jo.get("name"));
-            predicateDefinition.setArgs((Map<String, String>)predicate_jo.get("args"));
-            predicateDefinitionList.add(predicateDefinition);
-        }
-        r.setPredicates(predicateDefinitionList);
-        JSONArray filter_ja = JSONArray.parseArray(route.getFilters());
-        List<FilterDefinition> filterDefinitionList = new ArrayList<>();
-        for (int i = 0;i<filter_ja.size();i++){
-            JSONObject filter_jo = (JSONObject)filter_ja.get(i);
-            FilterDefinition filterDefinition = new FilterDefinition();
-            filterDefinition.setName((String) filter_jo.get("name"));
-            filterDefinition.setArgs((Map<String, String>)filter_jo.get("args"));
-            filterDefinitionList.add(filterDefinition);
-        }
-        r.setFilters(filterDefinitionList);
-        return r;
-    }
 }
